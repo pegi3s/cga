@@ -1,5 +1,8 @@
 #!/bin/bash
 
+version_emboss=${version_emboss:-latest}
+version_utilities=${version_utilities:-latest}
+
 set -o nounset
 set -o errexit
 
@@ -23,20 +26,20 @@ rm -f ${FILE_DIR}/tmp/tmp3 ${FILE_DIR}/tmp/tmp2a ${FILE_DIR}/tmp/tmp2
 docker run --rm \
 	-v ${HOST_FILE_DIR}:/data \
 	-v /var/run/docker.sock:/var/run/docker.sock \
-	pegi3s/utilities \
+	pegi3s/utilities:${version_utilities} \
 		batch_fasta_remove_line_breaks /data/${FILE_NAME}
 
 sed -i 's/ /_/g' ${FILE_NAME}
 
 docker run --rm \
 	-v ${HOST_FILE_DIR}:/data \
-	pegi3s/emboss \
+	pegi3s/emboss:${version_emboss} \
 		getorf -sequence /data/${FILE_NAME} -outseq /data/tmp/tmp2 -find 2
 
 docker run --rm \
 	-v ${HOST_FILE_DIR}:/data \
 	-v /var/run/docker.sock:/var/run/docker.sock \
-	pegi3s/utilities \
+	pegi3s/utilities:${version_utilities} \
 		batch_fasta_remove_line_breaks /data/tmp/tmp2
 
 grep -v '>' tmp/tmp2 > tmp/tmp2a
@@ -64,7 +67,7 @@ done < tmp/tmp2a
 
 docker run --rm \
 	-v ${HOST_FILE_DIR}:/data \
-	pegi3s/emboss \
+	pegi3s/emboss:${version_emboss} \
 		transeq -sequence /data/tmp/tmp2 -frame 1 -outseq /data/tmp/tmp3
 
 sed -i 's/_1 \[/ \[/g' ${FILE_DIR}/tmp/tmp3

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+version_blast=${version_blast:-latest}
+
 set -o nounset
 set -o errexit
 
@@ -25,7 +27,7 @@ cp ${FILE_DIR}/01_${4}.orfs.nuc.fasta tmp/tmp2
 
 docker run --rm \
     -v ${HOST_FILE_DIR}:/data \
-    pegi3s/blast \
+    pegi3s/blast:${version_blast} \
         makeblastdb \
             -in /data/tmp/tmp3 \
             -dbtype prot \
@@ -33,7 +35,7 @@ docker run --rm \
 
 docker run --rm \
     -v ${HOST_FILE_DIR}:/data \
-    pegi3s/blast \
+    pegi3s/blast:${version_blast} \
         blastp \
             -query /data/tmp/${REFERENCE} \
             -db /data/tmp/tmp3 \

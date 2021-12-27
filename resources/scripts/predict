@@ -1,5 +1,9 @@
 #!/bin/bash
 
+version_emboss=${version_emboss:-latest}
+version_blast=${version_blast:-latest}
+version_utilities=${version_utilities:-latest}
+
 set -o nounset
 set -o errexit
 
@@ -12,7 +16,7 @@ MIN_FULL_PROTEIN_SIZE=$5
 FILE_DIR=${WORKING_DIR}/cga_working_dir/${FILE_NAME}
 HOST_FILE_DIR=${HOST_WORKING_DIR}/cga_working_dir/${FILE_NAME}
 
-JOIN_EXONS_RESULTS=04_${FILE_NAME}.join_exons_results # TODO: this is $file
+JOIN_EXONS_RESULTS=04_${FILE_NAME}.join_exons_results
 
 echo "5. Predicting CDS and proteins (${FILE_NAME})"
 
@@ -25,13 +29,13 @@ cp ${WORKING_DIR}/${REFERENCE} tmp/${REFERENCE}
 if test -f "${JOIN_EXONS_RESULTS}"; then
 	docker run --rm \
 		-v ${HOST_FILE_DIR}:/data \
-		pegi3s/emboss \
+		pegi3s/emboss:${version_emboss} \
 			transeq \
 				-sequence /data/${JOIN_EXONS_RESULTS} -frame 1 -outseq /data/tmp/tmp1
 
 	docker run --rm \
 		-v ${HOST_FILE_DIR}:/data \
-		pegi3s/emboss \
+		pegi3s/emboss:${version_emboss} \
 			getorf \
 				-sequence /data/${JOIN_EXONS_RESULTS} \
 				-outseq /data/tmp/tmp2 \
@@ -40,7 +44,7 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 	if test -f "tmp/tmp2"; then
 		docker run --rm \
 			-v ${HOST_FILE_DIR}:/data \
-				pegi3s/emboss \
+				pegi3s/emboss:${version_emboss} \
 					transeq \
 						-sequence /data/tmp/tmp2 -frame 1 -outseq /data/tmp/tmp3
 
@@ -48,7 +52,7 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 			docker run --rm \
 				-v ${HOST_FILE_DIR}:/data \
 				-v /var/run/docker.sock:/var/run/docker.sock \
-				pegi3s/utilities \
+				pegi3s/utilities:${version_utilities} \
 					batch_fasta_remove_line_breaks /data/tmp/tmp1 /data/tmp/tmp2 /data/tmp/tmp3
 
 			rm -f 05_${FILE_NAME}.pep 05_${FILE_NAME}.nuc
@@ -68,14 +72,14 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 			
 			docker run --rm \
 				-v ${HOST_FILE_DIR}:/data \
-				pegi3s/blast \
+				pegi3s/blast:${version_blast} \
 					makeblastdb -in /data/tmp/05_${FILE_NAME}.pep.tmp -dbtype prot -parse_seqids
 
 			rm tmp/05_${FILE_NAME}.pep.tmp
 
 			docker run --rm \
 				-v ${HOST_FILE_DIR}:/data \
-				pegi3s/blast \
+				pegi3s/blast:${version_blast} \
 					blastp \
 						-query /data/tmp/${REFERENCE} \
 						-db /data/tmp/05_${FILE_NAME}.pep.tmp \
