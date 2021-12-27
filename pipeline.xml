@@ -41,24 +41,24 @@
 		</task>
 
 		<foreach id="get-orf" after="split-reference"
-			of="command" in="ls ${working_dir}/cga_working_dir" as="file">
+			of="command" in="cat ${working_dir}/cga_working_dir/files" as="file">
 			${scripts_dir}/get_orf ${working_dir} ${host_working_dir} ${file}
 		</foreach>
 
 		<foreach id="blast" after="*get-orf"
-			of="command" in="ls ${working_dir}/cga_working_dir" as="file">
+			of="command" in="cat ${working_dir}/cga_working_dir/files" as="file">
 			${scripts_dir}/blast ${working_dir} ${host_working_dir} ${reference_fasta} ${file}
 		</foreach>
 
 		<foreach id="sort" after="*blast"
-			of="command" in="ls ${working_dir}/cga_working_dir" as="file">
+			of="command" in="cat ${working_dir}/cga_working_dir/files" as="file">
 			${scripts_dir}/sort_fasta \
 				${working_dir}/cga_working_dir/${file}/02_${file}.ini \
 				${working_dir}/cga_working_dir/${file}/03_${file}.ini.sorted
 		</foreach>
 
 		<foreach id="join-exons" after="*sort"
-			of="command" in="ls ${working_dir}/cga_working_dir" as="file"
+			of="command" in="cat ${working_dir}/cga_working_dir/files" as="file"
 			params="max_dist intron_bp selection_criterion selection_correction">
 			${scripts_dir}/join_exons \
 				${working_dir} ${host_working_dir} \
@@ -67,7 +67,7 @@
 		</foreach>
 		
 		<foreach id="predict" after="*join-exons"
-			of="command" in="ls ${working_dir}/cga_working_dir" as="file"
+			of="command" in="cat ${working_dir}/cga_working_dir/files" as="file"
 			params="min_full_protein_size">
 			${scripts_dir}/predict ${working_dir} ${host_working_dir} ${reference_fasta} ${file} ${min_full_protein_size}
 		</foreach>

@@ -12,7 +12,7 @@ set -o errexit
 # ${version_seqkit}
 #
 
-rm -rf ${working_dir}/cga_working_dir/input_fasta_split
+rm -rf ${working_dir}/cga_working_dir/*
 
 docker run --rm -v ${host_working_dir}:/data \
 	pegi3s/seqkit:${version_seqkit} split \
@@ -26,3 +26,7 @@ for FILE_NAME in $(ls ${working_dir}/cga_working_dir/input_fasta_split/); do
 done
 
 rm -rf ${working_dir}/cga_working_dir/input_fasta_split/
+
+ls ${working_dir}/cga_working_dir > /tmp/files
+
+mv /tmp/files ${working_dir}/cga_working_dir/files
