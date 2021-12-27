@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+# Script parameters are specified in the following environment 
+# variables (set by Compi):
+# 
+# ${working_dir}
+#
+
+mkdir -p ${working_dir}/cga_working_dir

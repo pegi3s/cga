@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+# Script parameters are specified in the following environment 
+# variables (set by Compi):
+# 
+# ${version_seqkit}
+# ${version_blast}
+# ${version_emboss}
+# ${version_utilities}
+#
+
+docker pull pegi3s/seqkit:${version_seqkit}
+docker pull pegi3s/blast:${version_blast}
+docker pull pegi3s/emboss:${version_emboss}
+docker pull pegi3s/utilities:${version_utilities}

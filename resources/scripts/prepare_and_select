@@ -1,0 +1,77 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+# the input FASTA must contain only two sequences
+INPUT_FASTA=$1
+DISTANCE=$2
+OUTPUT_OVERLAP=$3
+
+TMP_DIR=$(mktemp -d /tmp/cga_prepare_select.XXXXX)
+
+cd $TMP_DIR
+
+# Prepare
+
+head -2 ${INPUT_FASTA} > ./tmp1
+tail -2 ${INPUT_FASTA} > tmp2
+sed -i '/>/!s/^/##/g' ./tmp2
+paste ./tmp1 ./tmp2 > ./tmp3
+sed -i 's/\t##/##/g; s/\t>/ \&\& /g' tmp3
+rm tmp1 tmp2
+
+# Select
+
+cut -f1 -d'[' tmp3 | grep '>' | sed 's/>//g' > tmp4
+rev tmp4 > tmp5
+sed -i 's/^[^_]*_//g; s/>//g' tmp5
+rev tmp5 > tmp6
+rm tmp5
+while read name; do
+	grep -A1 "$name.*$name" tmp3 >> tmp7
+done < tmp6
+touch tmp7
+sed 's/\n--//g; /--$/d' tmp7 > tmp8
+b=$(grep -o " - [0-9]*\].*\&" tmp8 | sed 's/[^0-9]//g')
+c=$(grep -o "\&.*" tmp8 | grep -o " - [0-9]*\]" | sed 's/[^0-9]//g')
+d=$((b - c))
+e=$((d * d))
+f=$((DISTANCE * DISTANCE))
+if [ "$e" -gt "$f" ]; then
+	rm tmp8
+	touch tmp8
+fi
+a=$(head -1 tmp6)
+sed "s/ \&\& $a//g; s/ - .* - / - /g" tmp8 > ${INPUT_FASTA}.ok
+rm tmp3 tmp4 tmp6 tmp8
+
+# Compute the overlap size
+if [ -s ${INPUT_FASTA}.ok ]; then
+	# The ${INPUT_FASTA}.ok file is not-empty
+	g=$(grep -o " - .* &&" tmp7 | cut -f1 -d ']' | sed 's/ //g; s/-//g')
+	h=$(grep -o " &&.*" tmp7 | cut -f2 -d '[' | cut -f1 -d '-' | sed 's/ //g')
+	i=0
+	if grep -q -F '##TAG' tmp7; then
+		i=$((i+3))
+	fi
+	# b=$(echo $seq"TGA") # TODO: @Jorge
+	if grep -q -F 'TGA##' tmp7; then
+		i=$((i+3))
+	fi
+	if grep -q -F 'TAA##' tmp7; then
+		i=$((i+3))
+	fi
+	if grep -q -F 'TAG##' tmp7; then
+		i=$((i+3))
+	fi
+	j=$((g - h + i + 1))
+	if [ "$j" -lt "0" ]; then
+		j=0
+	fi
+	echo $j > ${OUTPUT_OVERLAP}
+fi
+
+rm tmp7
+
+rm -rf ${TMP_DIR}

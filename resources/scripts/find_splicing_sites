@@ -1,0 +1,34 @@
+#!/bin/bash
+
+INPUT=$1
+OVERLAP_FILE=$2
+USER_DISTANCE=$3
+
+overlap=$(cat ${OVERLAP_FILE})
+distance=$(( $USER_DISTANCE + $overlap ))
+
+echo -e "\nFinding splicing sites:"
+echo -e "\toverlap=${overlap}"
+echo -e "\tdistance=${distance}"
+
+TMP_DIR=$(mktemp -d /tmp/cga_join_exons.XXXXX)
+
+cd $TMP_DIR
+
+for (( i=3; i<=$distance; i+=1 )); do
+	for (( j=3; j<=$distance; j+=1 )); do
+		a=$(( $i + $j ))
+		if ! (( $a % 3 )) && [ "$a" -gt "${overlap}" ]; then
+			i1=$(( $i - 2 ))
+			j1=$(( $j - 2 ))
+			sed "s/GT.\{$i1\}##.\{$j1\}AG/###/g" ${INPUT} >> tmp1
+		fi
+	done
+done
+
+grep -B1 '###' tmp1 > tmp2
+
+sed 's/###//g' tmp2 > ${INPUT}.joined
+
+rm -rf ${TMP_DIR}
+rm -f ${OVERLAP_FILE}

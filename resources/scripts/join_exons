@@ -1,0 +1,121 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+WORKING_DIR=$1
+HOST_WORKING_DIR=$2
+FILE_NAME=$3
+REFERENCE=$4
+MAX_DIST=$5
+INTRON_BP=$6
+SELECTION_CRITERION=$7
+SELECTION_CORRECTION=$8
+
+FILE_DIR=${WORKING_DIR}/cga_working_dir/${FILE_NAME}
+HOST_FILE_DIR=${HOST_WORKING_DIR}/cga_working_dir/${FILE_NAME}
+
+echo "4. Joining exons (${FILE_NAME})"
+echo -e "\tMAX_DIST=${MAX_DIST}"
+echo -e "\tINTRON_BP=${INTRON_BP}"
+
+join_exons_tmp1=${FILE_DIR}/tmp/join_exons_tmp1
+join_exons_tmp2=${FILE_DIR}/tmp/join_exons_tmp2
+join_exons_tmp3=${FILE_DIR}/tmp/join_exons_tmp3
+join_exons_tmp4=${FILE_DIR}/tmp/join_exons_tmp4
+results_tmp=${FILE_DIR}/tmp/join_exons_results_tmp
+
+mkdir -p ${FILE_DIR}/tmp
+
+cd ${FILE_DIR}/tmp
+
+# Copy initial files to the current file temporary directory
+
+cp ${FILE_DIR}/03_${FILE_NAME}.ini.sorted ${join_exons_tmp1}
+cp ${WORKING_DIR}/${REFERENCE} ${FILE_DIR}/tmp/${REFERENCE}
+
+# 3. Join exons
+b=3
+iteration=1
+while [[ "$b" -gt 2 ]]; do
+	echo -e "\n\nAttempting to join exons (iteration ${iteration})"
+	iteration=$((iteration+1))
+
+	a=$(cat ${join_exons_tmp1} | wc -l)
+	b=$((a / 2))
+
+	echo -e "\n\t4.1 - Prepare and select data"
+
+	# Take the first two sequences
+	head -4 ${join_exons_tmp1} > ${join_exons_tmp2}
+
+	# Take the remaining ones (all lines from line 5 to end)
+	tail -n+5 ${join_exons_tmp1} > ${join_exons_tmp3} 
+
+	prepare_and_select ${join_exons_tmp2} ${MAX_DIST} ${FILE_DIR}/tmp/join_exons_overlap
+
+	if [ -s ${join_exons_tmp2}.ok ]; then
+		# The ${join_exons_tmp2}.ok file is not-empty
+		echo -e "\n\t4.2 - Finding all suitable GT-AG splicing sites. Please, be patient"
+		sed -i 's/--##/##/g' ${join_exons_tmp2}.ok
+		find_splicing_sites ${join_exons_tmp2}.ok ${FILE_DIR}/tmp/join_exons_overlap ${INTRON_BP}
+
+		if [ -s ${join_exons_tmp2}.ok.joined ]; then
+			# The ${join_exons_tmp2}.ok.joined file is not-empty
+			echo -e "\n\t4.3 - Translating sequences in frame +1"
+
+			docker run --rm \
+				-v ${HOST_FILE_DIR}:/data \
+				pegi3s/emboss \
+					transeq \
+						-sequence /data/tmp/join_exons_tmp2.ok.joined \
+						-frame 1 \
+						-outseq /data/tmp/join_exons_tmp2.ok.joined.pep
+
+			docker run --rm \
+				-v ${HOST_FILE_DIR}:/data \
+				-v /var/run/docker.sock:/var/run/docker.sock \
+				pegi3s/utilities \
+					batch_fasta_remove_line_breaks \
+						/data/tmp/join_exons_tmp2.ok.joined.pep \
+						/data/tmp/join_exons_tmp2.ok.joined
+
+			echo -e "\n\t4.4 - Selecting the sequence that matches the given criteria" 
+			final_selection ${join_exons_tmp2}.ok.joined.pep ${REFERENCE} ${SELECTION_CRITERION} ${SELECTION_CORRECTION} ${HOST_FILE_DIR}/tmp
+
+			echo -e "\n\t4.5 - Getting selected sequence"
+			get_sequences ${join_exons_tmp2}.ok.joined.pep.selection ${join_exons_tmp2}.ok.joined.pep ${join_exons_tmp2}.ok.joined
+			
+			cat ${join_exons_tmp2}.ok.joined.sequences ${join_exons_tmp3} > ${join_exons_tmp1}
+
+			rm ${join_exons_tmp2}.ok.joined ${join_exons_tmp2}.ok.joined.sequences ${join_exons_tmp2}.ok.joined.pep ${join_exons_tmp2}.ok.joined.pep.selection 
+		else
+			# The ${join_exons_tmp2}.ok.joined file is empty
+			head -2 ${join_exons_tmp2} >> ${results_tmp}
+			tail -2 ${join_exons_tmp2} > ${join_exons_tmp4}
+			cat ${join_exons_tmp4} ${join_exons_tmp3} > ${join_exons_tmp1}
+			rm ${join_exons_tmp4}
+		fi
+	else
+		# The ${join_exons_tmp2}.ok file is empty
+		head -2 ${join_exons_tmp2} >> ${results_tmp}
+		tail -2 ${join_exons_tmp2} > ${join_exons_tmp4}
+		cat ${join_exons_tmp4} ${join_exons_tmp3} > ${join_exons_tmp1}
+		rm ${join_exons_tmp4}
+	fi
+	rm ${join_exons_tmp2} ${join_exons_tmp2}.ok ${join_exons_tmp3}
+done
+
+OUTPUT=${FILE_DIR}/04_${FILE_NAME}.join_exons_results
+rm -f ${OUTPUT}
+
+touch ${results_tmp}
+
+cat ${results_tmp} ${join_exons_tmp1} >> ${OUTPUT}
+sed -i 's/ /_/g; s/_$//g' ${OUTPUT}
+sed -i 's/^--$//g; /^[[:space:]]*$/d' ${OUTPUT}
+
+keep_temporary_files=${keep_temporary_files:-"no"}
+if [ "${keep_temporary_files}" == "no" ]; then
+	rm -f ${results_tmp} ${join_exons_tmp1}
+fi

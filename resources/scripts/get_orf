@@ -1,0 +1,78 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+WORKING_DIR=$1
+HOST_WORKING_DIR=$2
+FILE_NAME=$3
+
+FILE_DIR=${WORKING_DIR}/cga_working_dir/${FILE_NAME}
+HOST_FILE_DIR=${HOST_WORKING_DIR}/cga_working_dir/${FILE_NAME}
+
+FILE_NAME=00_${FILE_NAME}
+
+echo "1. Getting between stops ORFs (${FILE_NAME})"
+
+cd ${FILE_DIR}
+
+mkdir -p ${FILE_DIR}/tmp
+
+rm -f ${FILE_DIR}/tmp/tmp3 ${FILE_DIR}/tmp/tmp2a ${FILE_DIR}/tmp/tmp2
+
+docker run --rm \
+	-v ${HOST_FILE_DIR}:/data \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	pegi3s/utilities \
+		batch_fasta_remove_line_breaks /data/${FILE_NAME}
+
+sed -i 's/ /_/g' ${FILE_NAME}
+
+docker run --rm \
+	-v ${HOST_FILE_DIR}:/data \
+	pegi3s/emboss \
+		getorf -sequence /data/${FILE_NAME} -outseq /data/tmp/tmp2 -find 2
+
+docker run --rm \
+	-v ${HOST_FILE_DIR}:/data \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	pegi3s/utilities \
+		batch_fasta_remove_line_breaks /data/tmp/tmp2
+
+grep -v '>' tmp/tmp2 > tmp/tmp2a
+while read seq; do
+	a=$(echo "TAG"$seq)
+	if grep -q $a ${FILE_NAME}; then
+		sed -i "s/\b$seq\b/$a/g" tmp/tmp2
+	fi
+	b=$(echo $seq"TGA")
+	if grep -q $b ${FILE_NAME}; then
+		sed -i "s/\b$seq\b/$b/g" tmp/tmp2
+		sed -i "s/\b$a\b/TAG$b/g" tmp/tmp2
+	fi
+	c=$(echo $seq"TAA")
+	if grep -q $c ${FILE_NAME}; then
+		sed -i "s/\b$seq\b/$c/g" tmp/tmp2
+		sed -i "s/\b$a\b/TAG$c/g" tmp/tmp2
+	fi
+	d=$(echo $seq"TAG")
+	if grep -q $d ${FILE_NAME}; then
+		sed -i "s/\b$seq\b/$d/g" tmp/tmp2
+		sed -i "s/\b$a\b/TAG$d/g" tmp/tmp2
+	fi
+done < tmp/tmp2a
+
+docker run --rm \
+	-v ${HOST_FILE_DIR}:/data \
+	pegi3s/emboss \
+		transeq -sequence /data/tmp/tmp2 -frame 1 -outseq /data/tmp/tmp3
+
+sed -i 's/_1 \[/ \[/g' ${FILE_DIR}/tmp/tmp3
+
+cp ${FILE_DIR}/tmp/tmp3 ${FILE_DIR}/01_${3}.orfs.prot.fasta
+cp ${FILE_DIR}/tmp/tmp2 ${FILE_DIR}/01_${3}.orfs.nuc.fasta
+
+keep_temporary_files=${keep_temporary_files:-"no"}
+if [ "${keep_temporary_files}" == "no" ]; then
+	rm -f ${FILE_DIR}/tmp/tmp3 ${FILE_DIR}/tmp/tmp2a ${FILE_DIR}/tmp/tmp2
+fi

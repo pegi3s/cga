@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+WORKING_DIR=$1
+HOST_WORKING_DIR=$2
+REFERENCE=$3
+FILE_NAME=$4
+
+FILE_DIR=${WORKING_DIR}/cga_working_dir/${FILE_NAME}
+HOST_FILE_DIR=${HOST_WORKING_DIR}/cga_working_dir/${FILE_NAME}
+
+echo "2. Selecting ORFs of interest using blastp (${FILE_NAME})"
+
+cd ${FILE_DIR}
+
+mkdir -p ${FILE_DIR}/tmp
+
+rm -f tmp/tmp4 tmp/tmp5 tmp/tmp2 tmp/tmp3 tmp/tmp3.*
+
+cp ${WORKING_DIR}/${REFERENCE} tmp/${REFERENCE}
+cp ${FILE_DIR}/01_${4}.orfs.prot.fasta tmp/tmp3
+cp ${FILE_DIR}/01_${4}.orfs.nuc.fasta tmp/tmp2
+
+docker run --rm \
+    -v ${HOST_FILE_DIR}:/data \
+    pegi3s/blast \
+        makeblastdb \
+            -in /data/tmp/tmp3 \
+            -dbtype prot \
+            -parse_seqids
+
+docker run --rm \
+    -v ${HOST_FILE_DIR}:/data \
+    pegi3s/blast \
+        blastp \
+            -query /data/tmp/${REFERENCE} \
+            -db /data/tmp/tmp3 \
+            -evalue 0.05 \
+            -max_target_seqs 500000 \
+            -outfmt 6 \
+            -out /data/tmp/tmp4
+
+cut -f2 tmp/tmp4 > tmp/tmp5
+
+rm -f 02_${4}.ini
+
+grep -A1 -w -f tmp/tmp5 tmp/tmp2 > 02_${4}.ini
+
+keep_temporary_files=${keep_temporary_files:-"no"}
+if [ "${keep_temporary_files}" == "no" ]; then
+	rm -f tmp/tmp4 tmp/tmp5 tmp/tmp2 tmp/tmp3 tmp/tmp3.* tmp/${REFERENCE}
+fi
