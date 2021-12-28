@@ -41,14 +41,14 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 				-outseq /data/tmp/tmp2 \
 				-find 3 -reverse no -minsize ${MIN_FULL_PROTEIN_SIZE}
 
-	if test -f "tmp/tmp2"; then
+	if test -s "tmp/tmp2"; then
 		docker run --rm \
 			-v ${HOST_FILE_DIR}:/data \
 				pegi3s/emboss:${version_emboss} \
 					transeq \
 						-sequence /data/tmp/tmp2 -frame 1 -outseq /data/tmp/tmp3
 
-		if test -f "tmp/tmp3"; then
+		if test -s "tmp/tmp3"; then
 			docker run --rm \
 				-v ${HOST_FILE_DIR}:/data \
 				-v /var/run/docker.sock:/var/run/docker.sock \
@@ -67,7 +67,6 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 				fi
 			done < tmp/tmp3
 
-			# rm -f tmp/tmp1 tmp/tmp2 tmp/tmp3
 			sed 's/_/ /g' 05_${FILE_NAME}.pep > tmp/05_${FILE_NAME}.pep.tmp
 			
 			docker run --rm \
@@ -101,5 +100,5 @@ fi
 
 keep_temporary_files=${keep_temporary_files:-"no"}
 if [ "${keep_temporary_files}" == "no" ]; then
-	rm -f tmp/${REFERENCE}
+	rm -f tmp/${REFERENCE} tmp/tmp1 tmp/tmp2 tmp/tmp3
 fi
