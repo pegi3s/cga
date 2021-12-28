@@ -48,7 +48,7 @@ cut -f2 tmp/tmp4 > tmp/tmp5
 
 rm -f 02_${4}.ini
 
-grep -A1 -w -f tmp/tmp5 tmp/tmp2 > 02_${4}.ini
+grep --no-group-separator -A1 -w -f tmp/tmp5 tmp/tmp2 > 02_${4}.ini
 
 keep_temporary_files=${keep_temporary_files:-"no"}
 if [ "${keep_temporary_files}" == "no" ]; then
