@@ -5,16 +5,27 @@ set -o errexit
 
 # Sort an input FASTA file by sequence name
 
-INPUT=$1
-OUTPUT=$2
+WORKING_DIR=$1
+HOST_WORKING_DIR=$2
+FILE_NAME=$3
+INPUT=$4
+OUTPUT=$5
+
+FILE_DIR=${WORKING_DIR}/cga_working_dir/${FILE_NAME}
+HOST_FILE_DIR=${HOST_WORKING_DIR}/cga_working_dir/${FILE_NAME}
 
 echo "3. Sorting by sequence names (${INPUT})"
 
-rm -f ${OUTPUT}
+rm -f ${FILE_DIR}/${OUTPUT}
 
-grep '>' ${INPUT} | sed 's/>//g' | sort -V > /tmp/tmp1
-while read name; do
-	grep -F -A1 "${name}" ${INPUT} >> ${OUTPUT}
-done < /tmp/tmp1
+docker run --rm \
+	-v ${HOST_FILE_DIR}:/data \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	pegi3s/utilities:${version_utilities} \
+		fasta_remove_line_breaks /data/${INPUT}
 
-rm /tmp/tmp1
+docker run --rm \
+	-v ${HOST_FILE_DIR}:/data \
+	-v /var/run/docker.sock:/var/run/docker.sock \
+	pegi3s/utilities:${version_utilities} \
+		fasta_sort_by_header /data/${INPUT} /data/${OUTPUT}
