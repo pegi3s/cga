@@ -31,13 +31,13 @@ while read name; do
 	if [ "$name" = "$pname" ]; then
 		echo $name > final_selection_tmp1
 		echo $seq >> final_selection_tmp1
-		
+
 		docker run --rm \
 			-v ${HOST_INPUT_FILES_DIR}:/data \
 			pegi3s/emboss:${version_emboss} \
 				stretcher \
-					-asequence /data/final_selection_tmp1 \
-					-bsequence /data/${INPUT_REFERENCE} \
+					-sprotein1 /data/final_selection_tmp1 \
+					-sprotein2 /data/${INPUT_REFERENCE} \
 					-outfile /data/final_selection_tmp2
 
 		if [ ! -f final_selection_tmp2 ]; then
