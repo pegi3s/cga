@@ -6,11 +6,11 @@ file3=$3 # nuc original
 
 tmp1=$(mktemp /tmp/get_sequences.XXXXX)
 
-grep  -v '>' $file1 | head -1 | sed 's/*//g' > tmp1
+grep  -v '>' $file1 | head -1 | sed 's/*//g' > ${tmp1}
 while read list; do
-	a=$(grep -n $list $file2 | cut -f1 -d':')
+	a=$(grep -n -w $list $file2 | cut -f1 -d':' | head -1)
 	b=$(awk -v a=$a 'NR==a{ print; }' $file3)
 	grep -B1 $b $file3 | head -2 >> $file3.sequences
-done < tmp1
+done < ${tmp1}
 
-rm tmp1
+rm ${tmp1}
