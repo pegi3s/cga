@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cat ${1}/cga_working_dir/files | grep -v "^#"
