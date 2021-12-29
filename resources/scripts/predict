@@ -18,6 +18,8 @@ HOST_FILE_DIR=${HOST_WORKING_DIR}/cga_working_dir/${FILE_NAME}
 
 JOIN_EXONS_RESULTS=04_${FILE_NAME}.join_exons_results
 
+keep_temporary_files=${keep_temporary_files:-"no"}
+
 echo "5. Predicting CDS and proteins (${FILE_NAME})"
 
 cd ${FILE_DIR}
@@ -27,33 +29,35 @@ mkdir -p ${FILE_DIR}/tmp
 cp ${WORKING_DIR}/${REFERENCE} tmp/${REFERENCE}
 
 if test -f "${JOIN_EXONS_RESULTS}"; then
+	rm -f tmp/predict_tmp1 tmp/predict_tmp2 tmp/predict_tmp3
+
 	docker run --rm \
 		-v ${HOST_FILE_DIR}:/data \
 		pegi3s/emboss:${version_emboss} \
 			transeq \
-				-sequence /data/${JOIN_EXONS_RESULTS} -frame 1 -outseq /data/tmp/tmp1
+				-sequence /data/${JOIN_EXONS_RESULTS} -frame 1 -outseq /data/tmp/predict_tmp1
 
 	docker run --rm \
 		-v ${HOST_FILE_DIR}:/data \
 		pegi3s/emboss:${version_emboss} \
 			getorf \
 				-sequence /data/${JOIN_EXONS_RESULTS} \
-				-outseq /data/tmp/tmp2 \
+				-outseq /data/tmp/predict_tmp2 \
 				-find 3 -reverse no -minsize ${MIN_FULL_PROTEIN_SIZE}
 
-	if test -s "tmp/tmp2"; then
+	if test -s "tmp/predict_tmp2"; then
 		docker run --rm \
 			-v ${HOST_FILE_DIR}:/data \
 				pegi3s/emboss:${version_emboss} \
 					transeq \
-						-sequence /data/tmp/tmp2 -frame 1 -outseq /data/tmp/tmp3
+						-sequence /data/tmp/predict_tmp2 -frame 1 -outseq /data/tmp/predict_tmp3
 
-		if test -s "tmp/tmp3"; then
+		if test -s "tmp/predict_tmp3"; then
 			docker run --rm \
 				-v ${HOST_FILE_DIR}:/data \
 				-v /var/run/docker.sock:/var/run/docker.sock \
 				pegi3s/utilities:${version_utilities} \
-					batch_fasta_remove_line_breaks /data/tmp/tmp1 /data/tmp/tmp2 /data/tmp/tmp3
+					batch_fasta_remove_line_breaks /data/tmp/predict_tmp1 /data/tmp/predict_tmp2 /data/tmp/predict_tmp3
 
 			rm -f 05_${FILE_NAME}.pep 05_${FILE_NAME}.nuc
 			touch 05_${FILE_NAME}.pep 05_${FILE_NAME}.nuc
@@ -61,11 +65,11 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 			while read header; do
 				read sequence
 				a=$(echo $header | cut -f1,2 -d '[' | sed 's/>//g; s/_1 $//g')
-				if grep -q $sequence tmp/tmp1; then
-					grep -A1 -F "$a" tmp/tmp2 >> 05_${FILE_NAME}.nuc
-					grep -A1 -F "$a" tmp/tmp3 >> 05_${FILE_NAME}.pep
+				if grep -q $sequence tmp/predict_tmp1; then
+					grep -A1 -F "$a" tmp/predict_tmp2 >> 05_${FILE_NAME}.nuc
+					grep -A1 -F "$a" tmp/predict_tmp3 >> 05_${FILE_NAME}.pep
 				fi
-			done < tmp/tmp3
+			done < tmp/predict_tmp3
 
 			sed 's/_/ /g' 05_${FILE_NAME}.pep > tmp/05_${FILE_NAME}.pep.tmp
 			
@@ -74,7 +78,9 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 				pegi3s/blast:${version_blast} \
 					makeblastdb -in /data/tmp/05_${FILE_NAME}.pep.tmp -dbtype prot -parse_seqids
 
-			rm tmp/05_${FILE_NAME}.pep.tmp
+			if [ "${keep_temporary_files}" == "no" ]; then
+				rm tmp/05_${FILE_NAME}.pep.tmp
+			fi
 
 			docker run --rm \
 				-v ${HOST_FILE_DIR}:/data \
@@ -88,7 +94,9 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 						-outfmt 3 \
 						-out /data/05_${FILE_NAME}.pep.blast
 
-			rm tmp/05_${FILE_NAME}.pep.tmp.*
+			if [ "${keep_temporary_files}" == "no" ]; then
+				rm tmp/05_${FILE_NAME}.pep.tmp.*
+			fi
 		fi
 	fi
 fi
@@ -98,7 +106,6 @@ if test -f "05_${FILE_NAME}.nuc"; then
 	sed -i 's/ /_/g; s/_$//g' 05_${FILE_NAME}.nuc
 fi
 
-keep_temporary_files=${keep_temporary_files:-"no"}
 if [ "${keep_temporary_files}" == "no" ]; then
-	rm -f tmp/${REFERENCE} tmp/tmp1 tmp/tmp2 tmp/tmp3
+	rm -f tmp/${REFERENCE} tmp/predict_tmp1 tmp/predict_tmp2 tmp/predict_tmp3
 fi
