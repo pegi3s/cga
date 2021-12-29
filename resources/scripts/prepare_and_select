@@ -55,7 +55,6 @@ if [ -s ${INPUT_FASTA}.ok ]; then
 	if grep -q -F '##TAG' tmp7; then
 		i=$((i+3))
 	fi
-	# b=$(echo $seq"TGA") # TODO: @Jorge
 	if grep -q -F 'TGA##' tmp7; then
 		i=$((i+3))
 	fi
