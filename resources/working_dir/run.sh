@@ -17,7 +17,7 @@ if [[ ! -f "${PROJECT_DIR}/${PARAMS_FILE}" ]]; then
 	exit 1
 else
 	check=$(cat ${PROJECT_DIR}/${PARAMS_FILE} | grep "host_working_dir\=/path/to/host/working/dir" | wc -l)
-	if [ check -eq 1 ]; then
+	if [ ${check} -eq 1 ]; then
 		show_error "It seems that host_working_dir is not set in the params file (${PROJECT_DIR}/${PARAMS_FILE})"
 		exit 1
 	fi
