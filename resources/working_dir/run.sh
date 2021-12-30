@@ -23,11 +23,16 @@ else
 	fi
 fi
 
+timestamp=$(date +"%Y-%m-%d_%H:%M:%S")
+
+mkdir -p ${PROJECT_DIR}/logs/${timestamp}
+
 docker run --rm \
 	-v ${PROJECT_DIR}:/working_dir  \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v ~/.compi:/root/.compi \
 	pegi3s/cga:${CGA_VERSION} \
-            --params /working_dir/${PARAMS_FILE} \
-            -l /working_dir/logs \
-            -o ${ADDITIONAL_COMPI_PARAMS}
+		--params /working_dir/${PARAMS_FILE} \
+		-l /working_dir/logs \
+		-o ${ADDITIONAL_COMPI_PARAMS} \
+	2>&1 | tee ${PROJECT_DIR}/logs/${timestamp}/compi.log
