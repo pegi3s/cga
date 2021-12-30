@@ -15,6 +15,8 @@ ENV PATH=/scripts/:${PATH}
 
 COPY resources/working_dir/ /opt/working_dir/
 
+ENV TERM=xterm-256color
+
 # ADD PIPELINE
 ARG IMAGE_NAME
 ARG IMAGE_VERSION

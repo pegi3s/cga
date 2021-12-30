@@ -4,11 +4,16 @@ WORKING_DIR=$1
 FILES_LIST="${WORKING_DIR}/cga_working_dir/files"
 LOGS_DIR=$2
 
-
 display_usage() { 
-  echo -e "This script processes the Compi logs directory to create a report of tasks with errors or warnings."
-  echo -e "\nUsage:"
-  echo -e "\t`basename $0` <working_directory> <compi_logs_directory>"
+	echo -e "This script processes the Compi logs directory to create a report of tasks with errors or warnings."
+	echo -e "\nUsage:"
+	echo -e "\t`basename $0` <working_directory> <compi_logs_directory>"
+}
+
+show_error() {
+	tput setaf 1
+	echo -e "${1}"
+	tput sgr0
 }
 
 if [[ $1 == "--help" ]]; then
@@ -18,17 +23,17 @@ fi
 
 if [ $# -ne 2 ]
 then 
-	echo -e "This script requires two arguments.\n"
+	show_error "This script requires two arguments.\n"
 	display_usage
 	exit 1
 fi 
 
 if [[ ! -d ${LOGS_DIR} ]]; then
-	echo -e "The logs directory (${LOGS_DIR}) does not exist."
+	show_error "The logs directory (${LOGS_DIR}) does not exist."
 	exit 1
 else
 	if [[ ! -f ${FILES_LIST} ]]; then
-		echo -e "The files list (${FILES_LIST}) does not exist."
+		show_error "The files list (${FILES_LIST}) does not exist."
 		exit 1
 	fi
 fi
