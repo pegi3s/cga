@@ -4,7 +4,7 @@ LABEL maintainer="hlfernandez"
 # INSTALL COMPI
 ADD image-files/compi.tar.gz /
 ADD entrypoint.sh /entrypoint.sh
-RUN chmod u+x /entrypoint.sh
+RUN chmod ugo+x /entrypoint.sh
 
 # PLACE HERE YOUR DEPENDENCIES (SOFTWARE NEEDED BY YOUR PIPELINE)
 

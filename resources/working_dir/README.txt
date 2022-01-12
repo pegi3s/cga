@@ -4,11 +4,11 @@
 |
 |---------------------------------------------------------------------
 
-- Use the pegi3s/cga Docker image to initialize the working directory with the following command:
+- Use the pegi3s/cga Docker image to initialize the working directory with the following commands:
 
-    docker run --rm -v $(pwd)/cga_working_dir:/working_dir pegi3s/cga init_working_dir.sh /working_dir
+    mkdir $(pwd)/cga_working_dir && docker run --user "$(id -u):$(id -g)" --rm -v $(pwd)/cga_working_dir:/working_dir pegi3s/cga init_working_dir.sh /working_dir
     
-- This command will create "cga_working_dir" in the current directory of your host and then populates it with initial files: "cga.params", "input.fasta" (empty), "ref.fasta" (empty), and "run.sh".
+- These commands will create "cga_working_dir" in the current directory of your host and then populates it with initial files: "cga.params", "input.fasta" (empty), "ref.fasta" (empty), and "run.sh".
 
 |---------------------------------------------------------------------
 |
