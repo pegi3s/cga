@@ -33,6 +33,6 @@ docker run --rm \
 	-v ~/.compi:/root/.compi \
 	pegi3s/cga:${CGA_VERSION} \
 		--params /working_dir/${PARAMS_FILE} \
-		-l /working_dir/logs \
+		-l /working_dir/logs/${timestamp}/tasks \
 		-o ${ADDITIONAL_COMPI_PARAMS} \
 	2>&1 | tee ${PROJECT_DIR}/logs/${timestamp}/compi.log
