@@ -3,7 +3,7 @@
 <!-- This is an example file of a compi pipeline -->
 <pipeline xmlns="http://www.sing-group.org/compi/pipeline-1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 
 	<params>
 		<param name="host_working_dir" shortName="hw" global="true">Path of the working directory in the host.</param>
@@ -15,7 +15,7 @@
 		<param name="intron_bp" shortName="ibp">Distance around the junction point between two sequences where to look for splicing signals.</param>
 		<param name="selection_criterion" shortName="scr">The selection model to be used (1, 2, or 3): 1) similarity with reference sequence first, in case of a tie, percentage of gaps relative to reference sequence; 2) percentage of gaps relative to reference sequence first, in case of a tie, similarity with reference sequence; 3) a mixed model with similarity with reference sequence first, but if fewer gaps relative to reference sequence, similarity gets a bonus defined by the user. Currently, a bonus of 20, means 2%. </param>
 		<param name="selection_correction" shortName="sco" defaultValue="0">A bonus percentage times 10. For instance, 20 means 2% bonus. Something with 18% similarity acts as having 20% similarity.</param>
-		<param name="min_full_protein_size" shortName="mfps">Minimum size for CDS to be reported</param>
+		<param name="min_full_nucleotide_size" shortName="mfps">Minimum size for CDS to be reported</param>
 
 		<flag name="skip_pull_docker_images" shortName="sdi">Use this flag to skip the pull-docker-images task.</flag>
 		<param name="version_seqkit" shortName="vsq" defaultValue="2.1.0" global="true">Version of the pegi3s/seqkit image to use.</param>
@@ -70,10 +70,10 @@
 		
 		<foreach id="predict" after="*join-exons"
 			of="command" in="${scripts_dir}/list_files ${working_dir}" as="file"
-			params="min_full_protein_size">
+			params="min_full_nucleotide_size">
 			${scripts_dir}/predict \
 				${working_dir} ${host_working_dir} \
-				${reference_fasta} ${file} ${min_full_protein_size}
+				${reference_fasta} ${file} ${min_full_nucleotide_size}
 		</foreach>
         
 		<task id="collect-results" after="predict">

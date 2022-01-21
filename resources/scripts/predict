@@ -11,7 +11,7 @@ WORKING_DIR=$1
 HOST_WORKING_DIR=$2
 REFERENCE=$3
 FILE_NAME=$4
-MIN_FULL_PROTEIN_SIZE=$5
+MIN_FULL_NUCLEOTIDE_SIZE=$5
 
 FILE_DIR=${WORKING_DIR}/cga_working_dir/${FILE_NAME}
 HOST_FILE_DIR=${HOST_WORKING_DIR}/cga_working_dir/${FILE_NAME}
@@ -43,7 +43,7 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 			getorf \
 				-sequence /data/${JOIN_EXONS_RESULTS} \
 				-outseq /data/tmp/predict_tmp2 \
-				-find 3 -reverse no -minsize ${MIN_FULL_PROTEIN_SIZE}
+				-find 3 -reverse no -minsize ${MIN_FULL_NUCLEOTIDE_SIZE}
 
 	if test -s "tmp/predict_tmp2"; then
 		docker run --rm \

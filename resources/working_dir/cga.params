@@ -8,7 +8,7 @@ host_working_dir=/path/to/host/working/dir
 ## CGA parameters
 max_dist=10000
 intron_bp=500
-min_full_protein_size=200
+min_full_nucleotide_size=200
 selection_criterion=1
 # selection_correction=0
 
