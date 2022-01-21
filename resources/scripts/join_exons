@@ -123,7 +123,7 @@ touch ${results_tmp}
 
 cat ${results_tmp} ${join_exons_tmp1} >> ${OUTPUT}
 sed -i 's/ /_/g; s/_$//g' ${OUTPUT}
-sed -i 's/^--$//g; /^[[:space:]]*$/d' ${OUTPUT}
+sed -i 's/--$//g; /^[[:space:]]*$/d' ${OUTPUT}
 
 if [ "${keep_temporary_files}" == "no" ]; then
 	rm -f ${results_tmp} ${join_exons_tmp1}
