@@ -76,7 +76,7 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 			docker run --rm \
 				-v ${HOST_FILE_DIR}:/data \
 				pegi3s/blast:${version_blast} \
-					makeblastdb -in /data/tmp/05_${FILE_NAME}.pep.tmp -dbtype prot -parse_seqids
+					makeblastdb -in /data/tmp/05_${FILE_NAME}.pep.tmp -dbtype prot
 
 			if [ "${keep_temporary_files}" == "no" ]; then
 				rm tmp/05_${FILE_NAME}.pep.tmp
