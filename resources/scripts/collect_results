@@ -3,10 +3,19 @@
 set -o nounset
 set -o errexit
 
-rm -rf ${working_dir}/results
-mkdir -p ${working_dir}/results
+function collect() {
+	list=$(ls ${1} 2> /dev/null | wc -l)
 
-cat ${working_dir}/cga_working_dir/*/05_*blast > ${working_dir}/results/blast
-cat ${working_dir}/cga_working_dir/*/05_*pep > ${working_dir}/results/pep
-cat ${working_dir}/cga_working_dir/*/05_*nuc > ${working_dir}/results/nuc
-cat ${working_dir}/cga_working_dir/*/04_*results > ${working_dir}/results/results
+	if [ ${list} -gt 0 ]; then
+		cat ${1} > ${2}
+	else
+		echo "Nothing to collect for ${2}"
+	fi
+}
+
+rm -rf ${working_dir}/results && mkdir -p ${working_dir}/results
+
+collect "${working_dir}/cga_working_dir/*/05_*blast" "${working_dir}/results/blast"
+collect "${working_dir}/cga_working_dir/*/05_*pep" "${working_dir}/results/pep"
+collect "${working_dir}/cga_working_dir/*/05_*nuc" "${working_dir}/results/nuc"
+collect "${working_dir}/cga_working_dir/*/04_*results" "${working_dir}/results/results"
