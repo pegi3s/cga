@@ -125,6 +125,12 @@ cat ${results_tmp} ${join_exons_tmp1} >> ${OUTPUT}
 sed -i 's/ /_/g; s/_$//g' ${OUTPUT}
 sed -i 's/--$//g; /^[[:space:]]*$/d' ${OUTPUT}
 
+ORIGINAL_FASTA=${FILE_DIR}/00_${FILE_NAME}.original
+ORIGINAL_HEADER=$(head -1 ${ORIGINAL_FASTA})
+
+rm -f ${FILE_DIR}/05_OUT_${FILE_NAME}.join_exons_results
+sed ${OUTPUT} -e "s#^>CGA_SEQUENCE#${ORIGINAL_HEADER}#; s# #_#g" > ${FILE_DIR}/05_${FILE_NAME}.join_exons_results
+
 if [ "${keep_temporary_files}" == "no" ]; then
 	rm -f ${results_tmp} ${join_exons_tmp1}
 fi

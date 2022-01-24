@@ -18,4 +18,4 @@ rm -rf ${working_dir}/results && mkdir -p ${working_dir}/results
 collect "${working_dir}/cga_working_dir/*/05_*blast" "${working_dir}/results/blast"
 collect "${working_dir}/cga_working_dir/*/05_*pep" "${working_dir}/results/pep"
 collect "${working_dir}/cga_working_dir/*/05_*nuc" "${working_dir}/results/nuc"
-collect "${working_dir}/cga_working_dir/*/04_*results" "${working_dir}/results/results"
+collect "${working_dir}/cga_working_dir/*/05_*results" "${working_dir}/results/results"

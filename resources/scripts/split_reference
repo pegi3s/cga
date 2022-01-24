@@ -22,7 +22,10 @@ docker run --rm -v ${host_working_dir}:/data \
 
 for FILE_NAME in $(ls ${working_dir}/cga_working_dir/input_fasta_split/); do
 	mkdir -p ${working_dir}/cga_working_dir/${FILE_NAME}
-	mv ${working_dir}/cga_working_dir/input_fasta_split/${FILE_NAME} ${working_dir}/cga_working_dir/${FILE_NAME}/00_${FILE_NAME}
+	mv ${working_dir}/cga_working_dir/input_fasta_split/${FILE_NAME} ${working_dir}/cga_working_dir/${FILE_NAME}/00_${FILE_NAME}.original
+
+	echo ">CGA_SEQUENCE" > ${working_dir}/cga_working_dir/${FILE_NAME}/00_${FILE_NAME}
+	sed -e '1d' ${working_dir}/cga_working_dir/${FILE_NAME}/00_${FILE_NAME}.original >> ${working_dir}/cga_working_dir/${FILE_NAME}/00_${FILE_NAME}
 done
 
 rm -rf ${working_dir}/cga_working_dir/input_fasta_split/

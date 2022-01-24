@@ -104,6 +104,14 @@ fi
 if test -f "05_${FILE_NAME}.nuc"; then
 	sed -i 's/ /_/g; s/_$//g' 05_${FILE_NAME}.pep
 	sed -i 's/ /_/g; s/_$//g' 05_${FILE_NAME}.nuc
+
+	# Put the original header back in the output files (i.e. replace the "CGA_SEQUENCE" sequence identifier)
+	ORIGINAL_FASTA=${FILE_DIR}/00_${FILE_NAME}.original
+	ORIGINAL_HEADER=$(head -1 ${ORIGINAL_FASTA})
+
+	sed -i 05_${FILE_NAME}.pep -e "s#^>CGA_SEQUENCE#${ORIGINAL_HEADER}#; s# #_#g"
+	sed -i 05_${FILE_NAME}.nuc -e "s#^>CGA_SEQUENCE#${ORIGINAL_HEADER}#; s# #_#g"
+	sed -i 05_${FILE_NAME}.pep.blast -e "s#CGA SEQUENCE#${ORIGINAL_HEADER}#; s#>##"
 fi
 
 if [ "${keep_temporary_files}" == "no" ]; then
