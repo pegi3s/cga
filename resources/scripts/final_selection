@@ -78,13 +78,19 @@ while read name; do
 		d=1000000
 		touch final_selection_tmp2 final_selection_tmp3 final_selection_tmp4
 		cat final_selection_tmp4 final_selection_tmp3 > final_selection_tmp5
-		rm final_selection_tmp3 final_selection_tmp4
+		if [ "${keep_temporary_files}" == "no" ]; then
+			rm final_selection_tmp3 final_selection_tmp4
+		fi
 		mv final_selection_tmp5 final_selection_tmp4		
 	fi
-	rm final_selection_tmp2
+	if [ "${keep_temporary_files}" == "no" ]; then
+		rm final_selection_tmp2
+	fi
 done < ${INPUT_FILE}
 
 touch final_selection_tmp3 final_selection_tmp4
 cat final_selection_tmp4 final_selection_tmp3 > ${INPUT_FILE}.selection
 
-rm -f final_selection_tmp*
+if [ "${keep_temporary_files}" == "no" ]; then
+	rm -f final_selection_tmp*
+fi
