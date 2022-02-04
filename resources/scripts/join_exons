@@ -87,6 +87,12 @@ while [[ "$b" -gt 2 ]]; do
 						/data/tmp/join_exons_tmp2.ok.joined.pep \
 						/data/tmp/join_exons_tmp2.ok.joined
 
+			# Before the final selecction, remove sequences with in-frame STOP codons (i.e. * in the middle of the sequences) in the ${join_exons_tmp2}.ok.joined.pep file 
+			# and the corresponding nucleotidic sequences in the ${join_exons_tmp2}.ok.joined file
+			lines=$(grep --no-group-separator -B1 -n -E '^.+\*.+$' ${join_exons_tmp2}.ok.joined.pep | cut -f1 -d':' | cut -f1 -d'-' | tr '\n' 'X' | sed -e 's#X#d\;#g; s#X$##')
+			sed -e "${lines}" -i ${join_exons_tmp2}.ok.joined.pep 
+			sed -e "${lines}" -i ${join_exons_tmp2}.ok.joined
+
 			echo -e "\n\t4.4 - Selecting the sequence that matches the given criteria" 
 			final_selection ${join_exons_tmp2}.ok.joined.pep ${REFERENCE} ${SELECTION_CRITERION} ${SELECTION_CORRECTION} ${HOST_FILE_DIR}/tmp
 
