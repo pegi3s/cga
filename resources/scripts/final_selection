@@ -12,6 +12,8 @@ CORRECTION=$4
 HOST_INPUT_FILES_DIR=$5
 INPUT_FILES_DIR=$(dirname ${INPUT_FILE})
 
+keep_temporary_files=${keep_temporary_files:-"no"}
+
 function assign_and_move {
 	b=$a
 	d=$c
