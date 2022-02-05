@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CGA_VERSION=${CGA_VERSION-0.0.3}
+CGA_VERSION=${CGA_VERSION-0.0.6}
 
 PROJECT_DIR=$1
 PARAMS_FILE="cga.params"
@@ -28,7 +28,7 @@ timestamp=$(date +"%Y-%m-%d_%H:%M:%S")
 mkdir -p ${PROJECT_DIR}/logs/${timestamp}
 
 docker run --rm \
-	-v ${PROJECT_DIR}:/working_dir  \
+	-v ${PROJECT_DIR}:/working_dir \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v ~/.compi:/root/.compi \
 	pegi3s/cga:${CGA_VERSION} \
@@ -36,3 +36,9 @@ docker run --rm \
 		-l /working_dir/logs/${timestamp}/tasks \
 		-o ${ADDITIONAL_COMPI_PARAMS} \
 	2>&1 | tee ${PROJECT_DIR}/logs/${timestamp}/compi.log
+
+docker run --rm \
+	-v ${PROJECT_DIR}:/working_dir \
+		pegi3s/cga:${CGA_VERSION} \
+			process_logs.sh /working_dir /working_dir/logs/${timestamp}/tasks \
+		> ${PROJECT_DIR}/logs/${timestamp}/process_logs.tsv
