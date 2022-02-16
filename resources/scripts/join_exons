@@ -46,6 +46,8 @@ while [[ "$b" -gt 2 ]]; do
 	echo -e "\n\nAttempting to join exons (iteration ${iteration})"
 	iteration=$((iteration+1))
 
+	rm -f ${join_exons_tmp2}.ok.joined ${join_exons_tmp2}.ok.joined.sequences ${join_exons_tmp2}.ok.joined.pep ${join_exons_tmp2}.ok.joined.pep.selection ${join_exons_tmp2} ${join_exons_tmp2}.ok ${join_exons_tmp3} ${join_exons_tmp4} final_selection_tmp*
+
 	a=$(cat ${join_exons_tmp1} | wc -l)
 	b=$((a / 2))
 
@@ -56,8 +58,6 @@ while [[ "$b" -gt 2 ]]; do
 
 	# Take the remaining ones (all lines from line 5 to end)
 	tail -n+5 ${join_exons_tmp1} > ${join_exons_tmp3} 
-
-	rm -f ${join_exons_tmp2}.ok.joined ${join_exons_tmp2}.ok.joined.sequences ${join_exons_tmp2}.ok.joined.pep ${join_exons_tmp2}.ok.joined.pep.selection 
 
 	prepare_and_select ${join_exons_tmp2} ${MAX_DIST} ${FILE_DIR}/tmp/join_exons_overlap
 
