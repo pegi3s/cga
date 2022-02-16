@@ -1,0 +1,24 @@
+#!/bin/bash
+
+join_exons_tmp2=$1
+
+# Before the final selection, remove sequences with in-frame STOP codons (i.e. * in the middle of the sequences) in the ${join_exons_tmp2}.ok.joined.pep file 
+# and the corresponding nucleotidic sequences in the ${join_exons_tmp2}.ok.joined file
+lines=$(grep --no-group-separator -B1 -n -E '^.+\*.+$' ${join_exons_tmp2}.ok.joined.pep | cut -f1 -d':' | cut -f1 -d'-' | tr '\n' 'X' | sed -e 's#X#d\;#g; s#X$##')
+sed -e "${lines}" -i ${join_exons_tmp2}.ok.joined.pep 
+sed -e "${lines}" -i ${join_exons_tmp2}.ok.joined
+
+# Also, remove sequences with STOP codons at the beginning
+number=$(head -2 ${join_exons_tmp2}.ok.joined.pep | grep -o '\[.*-' | cut -f1 -d' ' | sed 's/\[//')
+number_fixed=$((number+3))
+SED_REP=$(echo "s/\[${number} -/\[${number_fixed} -/")
+SED_LINES=$(cat ${join_exons_tmp2}.ok.joined.pep | grep -B1 -n '^*' | grep '>' | cut -d'-' -f1 | tr '\n' 'X' | sed -e "s#X#${SED_REP}; #g")
+SED_LINES=$(echo $SED_LINES | sed 's#\[#\\\[#g')
+
+sed -e "${SED_LINES}" -i ${join_exons_tmp2}.ok.joined.pep
+sed -e "${SED_LINES}" -i ${join_exons_tmp2}.ok.joined
+
+sed -i 's/^TAA//' ${join_exons_tmp2}.ok.joined
+sed -i 's/^TAG//' ${join_exons_tmp2}.ok.joined
+sed -i 's/^TGA//' ${join_exons_tmp2}.ok.joined
+sed -i 's/^*//' ${join_exons_tmp2}.ok.joined.pep
