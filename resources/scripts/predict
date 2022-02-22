@@ -72,30 +72,33 @@ if test -f "${JOIN_EXONS_RESULTS}"; then
 			done < tmp/predict_tmp3
 
 			sed 's/_/ /g' 05_${FILE_NAME}.pep > tmp/05_${FILE_NAME}.pep.tmp
-			
-			docker run --rm \
-				-v ${HOST_FILE_DIR}:/data \
-				pegi3s/blast:${version_blast} \
-					makeblastdb -in /data/tmp/05_${FILE_NAME}.pep.tmp -dbtype prot
 
-			if [ "${keep_temporary_files}" == "no" ]; then
-				rm tmp/05_${FILE_NAME}.pep.tmp
-			fi
+			if [ -s tmp/05_${FILE_NAME}.pep.tmp ]; then
 
-			docker run --rm \
-				-v ${HOST_FILE_DIR}:/data \
-				pegi3s/blast:${version_blast} \
-					blastp \
-						-query /data/tmp/${REFERENCE} \
-						-db /data/tmp/05_${FILE_NAME}.pep.tmp \
-						-evalue 0.05 \
-						-num_descriptions 500000 \
-						-num_alignments 500000 \
-						-outfmt 3 \
-						-out /data/05_${FILE_NAME}.pep.blast
+				docker run --rm \
+					-v ${HOST_FILE_DIR}:/data \
+					pegi3s/blast:${version_blast} \
+						makeblastdb -in /data/tmp/05_${FILE_NAME}.pep.tmp -dbtype prot
 
-			if [ "${keep_temporary_files}" == "no" ]; then
-				rm tmp/05_${FILE_NAME}.pep.tmp.*
+				if [ "${keep_temporary_files}" == "no" ]; then
+					rm tmp/05_${FILE_NAME}.pep.tmp
+				fi
+
+				docker run --rm \
+					-v ${HOST_FILE_DIR}:/data \
+					pegi3s/blast:${version_blast} \
+						blastp \
+							-query /data/tmp/${REFERENCE} \
+							-db /data/tmp/05_${FILE_NAME}.pep.tmp \
+							-evalue 0.05 \
+							-num_descriptions 500000 \
+							-num_alignments 500000 \
+							-outfmt 3 \
+							-out /data/05_${FILE_NAME}.pep.blast
+
+				if [ "${keep_temporary_files}" == "no" ]; then
+					rm tmp/05_${FILE_NAME}.pep.tmp.*
+				fi
 			fi
 		fi
 	fi
@@ -111,7 +114,10 @@ if test -f "05_${FILE_NAME}.nuc"; then
 
 	sed -i 05_${FILE_NAME}.pep -e "s#^>CGA_SEQUENCE#${ORIGINAL_HEADER}#; s# #_#g"
 	sed -i 05_${FILE_NAME}.nuc -e "s#^>CGA_SEQUENCE#${ORIGINAL_HEADER}#; s# #_#g"
-	sed -i 05_${FILE_NAME}.pep.blast -e "s#CGA SEQUENCE#${ORIGINAL_HEADER}#; s#>##"
+
+	if test -f "05_${FILE_NAME}.pep.blast"; then
+		sed -i 05_${FILE_NAME}.pep.blast -e "s#CGA SEQUENCE#${ORIGINAL_HEADER}#; s#>##"
+	fi
 fi
 
 if [ "${keep_temporary_files}" == "no" ]; then

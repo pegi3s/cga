@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CGA_VERSION=${CGA_VERSION-0.0.8}
+CGA_VERSION=${CGA_VERSION-0.0.9}
 
 PROJECT_DIR=$1
 PARAMS_FILE="cga.params"
