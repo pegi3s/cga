@@ -3,7 +3,7 @@
 <!-- This is an example file of a compi pipeline -->
 <pipeline xmlns="http://www.sing-group.org/compi/pipeline-1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<version>0.0.9</version>
+	<version>0.0.10</version>
 
 	<params>
 		<param name="host_working_dir" shortName="hw" global="true">Path of the working directory in the host.</param>
@@ -60,6 +60,7 @@
 		</foreach>
 
 		<foreach id="join-exons" after="*sort"
+			if="[[ -f ${working_dir}/cga_working_dir/${file}/03_${file}.ini.sorted ]]"
 			of="command" in="${scripts_dir}/list_files ${working_dir}" as="file"
 			params="max_dist intron_bp selection_criterion selection_correction">
 			${scripts_dir}/join_exons \
@@ -69,6 +70,7 @@
 		</foreach>
 		
 		<foreach id="predict" after="*join-exons"
+			if="[[ -f ${working_dir}/cga_working_dir/${file}/04_${file}.join_exons_results ]]"
 			of="command" in="${scripts_dir}/list_files ${working_dir}" as="file"
 			params="min_full_nucleotide_size">
 			${scripts_dir}/predict \
