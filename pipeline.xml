@@ -3,19 +3,19 @@
 <!-- This is an example file of a compi pipeline -->
 <pipeline xmlns="http://www.sing-group.org/compi/pipeline-1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<version>0.0.10</version>
+	<version>0.0.11</version>
 
 	<params>
 		<param name="host_working_dir" shortName="hw" global="true">Path of the working directory in the host.</param>
 		<param name="working_dir" shortName="w" global="true" defaultValue="/working_dir">Path of the working directory.</param>
 		<param name="input_fasta" shortName="if" global="true" defaultValue="input.fasta">Name of the input FASTA file containing the sequences to be annotated (relative to the working directory)</param>
-		<param name="reference_fasta" shortName="rf" global="true" defaultValue="ref.fasta">Name of the FASTA filel containing the reference sequence (relative to the working directory)</param>
+		<param name="reference_fasta" shortName="rf" global="true" defaultValue="ref.fasta">Name of the FASTA file containing the reference sequence (relative to the working directory)</param>
 
 		<param name="max_dist" shortName="md">Maximum distance between exons (in this case sequences identified by getorf) from the same gene. It only applies to large genome sequences where there is some chance that two genes with similar features are present.</param>
 		<param name="intron_bp" shortName="ibp">Distance around the junction point between two sequences where to look for splicing signals.</param>
-		<param name="selection_criterion" shortName="scr">The selection model to be used (1, 2, or 3): 1) similarity with reference sequence first, in case of a tie, percentage of gaps relative to reference sequence; 2) percentage of gaps relative to reference sequence first, in case of a tie, similarity with reference sequence; 3) a mixed model with similarity with reference sequence first, but if fewer gaps relative to reference sequence, similarity gets a bonus defined by the user. Currently, a bonus of 20, means 2%. </param>
-		<param name="selection_correction" shortName="sco" defaultValue="0">A bonus percentage times 10. For instance, 20 means 2% bonus. Something with 18% similarity acts as having 20% similarity.</param>
-		<param name="min_full_nucleotide_size" shortName="mfps">Minimum size for CDS to be reported</param>
+		<param name="selection_criterion" shortName="scr">The selection model to be used (1, 2, or 3): 1) similarity with reference sequence first, in case of a tie, percentage of gaps relative to reference sequence; 2) percentage of gaps relative to reference sequence first, in case of a tie, similarity with reference sequence; 3) a mixed model with similarity with reference sequence first, but if fewer gaps relative to reference sequence, similarity gets a bonus defined by the user. Currently, a bonus of 20, means 2%.</param>
+		<param name="selection_correction" shortName="sco" defaultValue="0">A bonus percentage times 10. For instance, 20 means 2% bonus. Something with 18% similarity acts as having 20% similarity. Applied when selection_criterion=3.</param>
+		<param name="min_full_nucleotide_size" shortName="mfps">Minimum size for CDS to be reported.</param>
 
 		<flag name="skip_pull_docker_images" shortName="sdi">Use this flag to skip the pull-docker-images task.</flag>
 		<param name="version_seqkit" shortName="vsq" defaultValue="2.1.0" global="true">Version of the pegi3s/seqkit image to use.</param>
@@ -36,11 +36,11 @@
 			${scripts_dir}/initialization
 		</task>
 
-		<task id="split-reference" after="initialization">
-			${scripts_dir}/split_reference
+		<task id="split-input" after="initialization">
+			${scripts_dir}/split_input
 		</task>
 
-		<foreach id="get-orf" after="split-reference"
+		<foreach id="get-orf" after="split-input"
 			of="command" in="${scripts_dir}/list_files ${working_dir}" as="file">
 			${scripts_dir}/get_orf ${working_dir} ${host_working_dir} ${file}
 		</foreach>
@@ -82,4 +82,16 @@
 			${scripts_dir}/collect_results
 		</task>
 	</tasks>
+    
+	<metadata>
+			<task-description id="pull-docker-images">.</task-description>
+			<task-description id="initialization">.</task-description>
+			<task-description id="split-input">.</task-description>
+			<task-description id="get-orf">.</task-description>
+			<task-description id="blast">.</task-description>
+			<task-description id="sort">.</task-description>
+			<task-description id="join-exons">.</task-description>
+			<task-description id="predict">.</task-description>
+			<task-description id="collect-results">.</task-description>
+	</metadata>
 </pipeline>
