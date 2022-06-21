@@ -3,12 +3,12 @@
 join_exons_tmp2=$1
 
 # Before the final selection, remove sequences with in-frame STOP codons (i.e. * in the middle of the sequences) in the ${join_exons_tmp2}.ok.joined.pep file 
-# and the corresponding nucleotidic sequences in the ${join_exons_tmp2}.ok.joined file
+# and the corresponding nucleotidic sequences in the ${join_exons_tmp2}.ok.joined file.
 lines=$(grep --no-group-separator -B1 -n -E '^.+\*.+$' ${join_exons_tmp2}.ok.joined.pep | cut -f1 -d':' | cut -f1 -d'-' | tr '\n' 'X' | sed -e 's#X#d\;#g; s#X$##')
 sed -e "${lines}" -i ${join_exons_tmp2}.ok.joined.pep 
 sed -e "${lines}" -i ${join_exons_tmp2}.ok.joined
 
-# Also, remove sequences with STOP codons at the beginning
+# Also, edit sequences to remove STOP codons at the beginning. Note that if this happens, the sequence coordinates must be corrected to substract 3 units.
 number=$(head -2 ${join_exons_tmp2}.ok.joined.pep | grep -o '\[.*-' | cut -f1 -d' ' | sed 's/\[//')
 number_fixed=$((number+3))
 SED_REP=$(echo "s/\[${number} -/\[${number_fixed} -/")
