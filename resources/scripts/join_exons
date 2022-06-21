@@ -87,7 +87,7 @@ while [[ "$b" -gt 2 ]]; do
 						/data/tmp/join_exons_tmp2.ok.joined.pep \
 						/data/tmp/join_exons_tmp2.ok.joined
 
-			join_exons_remove_stops ${join_exons_tmp2}
+			remove_stops ${join_exons_tmp2}
 
 			echo -e "\n\t4.4 - Selecting the sequence that matches the given criteria" 
 			final_selection ${join_exons_tmp2}.ok.joined.pep ${REFERENCE} ${SELECTION_CRITERION} ${SELECTION_CORRECTION} ${HOST_FILE_DIR}/tmp
