@@ -1,4 +1,6 @@
 #
-#Mon Dec 13 19:21:01 CET 2021
+#Wed Jun 22 12:25:33 CEST 2022
+hub.pipeline.alias=cga
 compi.version=1.5.0-SNAPSHOT
 image.name=pegi3s/cga
+hub.pipeline.id=62b2ee1dcc1507001943ab83
