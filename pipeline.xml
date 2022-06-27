@@ -3,7 +3,7 @@
 <!-- This is an example file of a compi pipeline -->
 <pipeline xmlns="http://www.sing-group.org/compi/pipeline-1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<version>0.0.11</version>
+	<version>1.0.0</version>
 
 	<params>
 		<param name="host_working_dir" shortName="hw" global="true">Path of the working directory in the host.</param>
@@ -84,14 +84,14 @@
 	</tasks>
     
 	<metadata>
-			<task-description id="pull-docker-images">.</task-description>
-			<task-description id="initialization">.</task-description>
-			<task-description id="split-input">.</task-description>
-			<task-description id="get-orf">.</task-description>
-			<task-description id="blast">.</task-description>
-			<task-description id="sort">.</task-description>
-			<task-description id="join-exons">.</task-description>
-			<task-description id="predict">.</task-description>
-			<task-description id="collect-results">.</task-description>
+			<task-description id="pull-docker-images">Downloads the neccessary Docker images for external software (BLAST, seqkit, etc.).</task-description>
+			<task-description id="initialization">Initializes the internal working directory.</task-description>
+			<task-description id="split-input">Splits the input FASTA file into several FASTA files containing one input sequence each.</task-description>
+			<task-description id="get-orf">Obtains all between STOP codons open reading frames (ORF) longer than 30 bp using EMBOSS getorf.</task-description>
+			<task-description id="blast">Creates a protein BLAST database for each file from the previous step and performs a blastp using the reference FASTA file.</task-description>
+			<task-description id="sort">Sorts files to ensure that exons are ordered according to their relative location in the genome, using the information that the EMBOSS getorf program outputs in the sequence headers.</task-description>
+			<task-description id="join-exons">Runs the 6 sub-steps for joining exons iteratively until all exons have been successfully joined. Check the documentation for more details about these 6 sub-steps.</task-description>
+			<task-description id="predict">Processes the output of the previous step using a combination of the EMBOSS getorf and transeq programs to obtain the predicted CDS and protein sequences (only those in frame +1 are considered) only if they are longer than the minimum size specified by the user in the min_full_nucleotide_size parameter.</task-description>
+			<task-description id="collect-results">Aggregates the results from each input sequence analysed to generate the aggregated output files under the results directory.</task-description>
 	</metadata>
 </pipeline>
