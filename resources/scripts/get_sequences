@@ -13,4 +13,6 @@ while read list; do
 	grep -B1 $b $file3 | head -2 >> $file3.sequences
 done < ${tmp1}
 
+touch $file3.sequences
+
 rm ${tmp1}
