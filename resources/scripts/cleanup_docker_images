@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+# Script parameters are specified in the following environment 
+# variables (set by Compi):
+# 
+# ${version_seqkit}
+# ${version_blast}
+# ${version_emboss}
+# ${version_utilities}
+#
+
+echo "Cleaning up Docker images..."
+
+docker rmi pegi3s/seqkit:${version_seqkit}
+docker rmi pegi3s/blast:${version_blast}
+docker rmi pegi3s/emboss:${version_emboss}
+docker rmi pegi3s/utilities:${version_utilities}

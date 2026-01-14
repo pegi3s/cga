@@ -14,3 +14,4 @@ selection_correction=10
 
 ## Flags
 # skip_pull_docker_images
+# cleanup_docker_images

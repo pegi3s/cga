@@ -3,7 +3,7 @@
 <!-- This is an example file of a compi pipeline -->
 <pipeline xmlns="http://www.sing-group.org/compi/pipeline-1.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<version>1.0.1-docker29.0.1</version>
+	<version>1.1.0</version>
 
 	<params>
 		<param name="host_working_dir" shortName="hw" global="true">Path of the working directory in the host.</param>
@@ -18,6 +18,7 @@
 		<param name="min_full_nucleotide_size" shortName="mfps">Minimum size for CDS to be reported.</param>
 
 		<flag name="skip_pull_docker_images" shortName="sdi">Use this flag to skip the pull-docker-images task.</flag>
+		<flag name="cleanup_docker_images" shortName="cdi">Use this flag to run the cleanup-docker-images task.</flag>
 		<param name="version_seqkit" shortName="vsq" defaultValue="2.1.0" global="true">Version of the pegi3s/seqkit image to use.</param>
 		<param name="version_blast" shortName="vb" defaultValue="2.10.0" global="true">Version of the pegi3s/blast image to use.</param>
 		<param name="version_emboss" shortName="ve" defaultValue="6.6.0" global="true">Version of the pegi3s/emboss image to use.</param>
@@ -81,6 +82,10 @@
 		<task id="collect-results" after="predict">
 			${scripts_dir}/collect_results
 		</task>
+
+		<task id="cleanup-docker-images" params="cleanup_docker_images" if="[ ! -v ${cleanup_docker_images} ]">
+			${scripts_dir}/cleanup_docker_images
+		</task>
 	</tasks>
     
 	<metadata>
@@ -93,5 +98,6 @@
 			<task-description id="join-exons">Runs the 6 sub-steps for joining exons iteratively until all exons have been successfully joined. Check the documentation for more details about these 6 sub-steps.</task-description>
 			<task-description id="predict">Processes the output of the previous step using a combination of the EMBOSS getorf and transeq programs to obtain the predicted CDS and protein sequences (only those in frame +1 are considered) only if they are longer than the minimum size specified by the user in the min_full_nucleotide_size parameter.</task-description>
 			<task-description id="collect-results">Aggregates the results from each input sequence analysed to generate the aggregated output files under the results directory.</task-description>
+			<task-description id="cleanup-docker-images">Removes the downloaded Docker images (requires passing the 'cleanup_docker_images' flag).</task-description>
 	</metadata>
 </pipeline>

@@ -46,6 +46,8 @@ The "run.sh" script executes the neccessary "docker run" command to run the Comp
 - For instance, to run all tasks from beginning until the "sort" task (included):
     
     ./run.sh /path/to/project-directory "--until sort"
+
+- For the "cleanup-docker-images" to be executed, it is required including "cleanup_docker_images" in the parameters file.
     
 |---------------------------------------------------------------------
 |
