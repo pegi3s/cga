@@ -1,6 +1,9 @@
 # CGA [![license](https://img.shields.io/badge/license-MIT-brightgreen)](https://github.com/pegi3s/cga) [![dockerhub](https://img.shields.io/badge/hub-docker-blue)](https://hub.docker.com/r/pegi3s/cga) [![compihub](https://img.shields.io/badge/hub-compi-blue)](https://www.sing-group.org/compihub/explore/62b2ee1dcc1507001943ab83)
 > **CGA** (Conserved Genome Annotation) is a [Compi](https://www.sing-group.org/compi/) pipeline to efficiently perform CDS annotations by automating the steps that researchers usually follow when performing manual annotations. A Docker image is available for this pipeline in [this Docker Hub repository](https://hub.docker.com/r/pegi3s/cga).
 
+> [!WARNING]
+> This image runs Docker in Docker. Users that are already running Docker 29 should start using the image with the `pegi3s/cga:1.1.0`, while users that did not yet update their Docker version to Docker 29 should use the image with the `pegi3s/cga:1.0.1` tag. Starting with version `pegi3s/cga:1.0.1-docker29.0.1`, from now on, only images that are compatible with Docker 29 or above will be released. You can check your Docker version by running the command: `docker --version`.
+
 ## CGA repositories
 
 - [GitHub](https://github.com/pegi3s/cga)
