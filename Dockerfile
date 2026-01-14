@@ -1,4 +1,4 @@
-FROM pegi3s/docker:20.04
+FROM pegi3s/docker:29.0.1
 LABEL maintainer="hlfernandez"
 
 # INSTALL COMPI
