@@ -9,3 +9,5 @@ Download and uncompress the ZIP file, and move the directory named `cga-test-dat
 ## Compatible versions
 
 - 1.0.0
+- 1.0.1
+- 1.1.0
